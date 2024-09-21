@@ -1,5 +1,5 @@
 # SimplyScore 
-Python script to compile MusicXML into simplified music score.
+The purpose of this project is to convert the internationally used MusicXML file into a simple musical notation format that is easy for Chinese people to understand.
 
 ## Guidance
 Firstly, install the required font for simplified music score in `fonts/`.
