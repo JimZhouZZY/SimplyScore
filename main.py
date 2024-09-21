@@ -33,8 +33,10 @@ def convert_to_jianpu(note, fifths):
         if note_step == 'R':
             jianpu_note = '0' 
         else:
-            note_step_cor = (int(note_map[note_step])-correction[str(fifths)])%7
+            note_step_cor = (int(note_map[note_step]) + correction[str(fifths)])%7
             jianpu_note = str(note_step_cor) if note_step_cor != 0 else '7'
+            if (int(note_map[note_step]) + correction[str(fifths)]) <= 0:
+                octave -= 1 
     else:
         return ""
 
