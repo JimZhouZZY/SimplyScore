@@ -1,7 +1,11 @@
 # MusicXML and outputs
 *.xml
+music.xml
 *.MusicXML
 *.docx
+
+# Trash
+.trash/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
