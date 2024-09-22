@@ -1,13 +1,26 @@
 import argparse
 import datetime
 import xml.etree.ElementTree as ET
+
 from docx import Document
 from docx.shared import Pt
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
-note_map = {'R': '0', 'C': '1', 'D': '2', 'E': '3', 'F': '4', 'G': '5', 'A': '6', 'B': '7'}
-correction = {
+# Mapping note names and notes. 
+MAP_NOTE = {
+    'R': '0', 
+    'C': '1', 
+    'D': '2', 
+    'E': '3', 
+    'F': '4', 
+    'G': '5', 
+    'A': '6', 
+    'B': '7'
+}
+
+# Mapping fifths value and pitch correction
+MAP_CORRECTION = {
     "-7": 0,
     "-6": -4,
     "-5": -1,
@@ -25,61 +38,104 @@ correction = {
     "7": 0,
 }
 
-def convert_to_jianpu(note, fifths):
+def convert_to_jianpu(note, attributes):
     note_step = note["step"]
     octave = note['octave']
-    duration_type = note['type']
+    note_type = note['type']
     duration = note['duration']
     dot_count = note['dot_count']
-    if note_step in note_map:
+
+    fifths = attributes['fifths']
+    divisions = attributes['divisions']
+
+    if note_step in MAP_NOTE:
         if note_step == 'R':
             jianpu_note = '0' 
         else:
-            note_step_cor = (int(note_map[note_step]) + correction[str(fifths)])%7
+            note_step_cor = (int(MAP_NOTE[note_step]) + MAP_CORRECTION[str(fifths)])%7
             jianpu_note = str(note_step_cor) if note_step_cor != 0 else '7'
-            if (int(note_map[note_step]) + correction[str(fifths)]) <= 0:
+            if (int(MAP_NOTE[note_step]) + MAP_CORRECTION[str(fifths)]) <= 0:
                 octave -= 1 
     else:
         return ""
 
-    if octave > 4:
-        jianpu_note += "'" * (octave - 4)  # 高音点
-    elif octave < 4:
-        # TODO
-        jianpu_note = jianpu_note  # 低音点
-    
-    # 加入时值标识
-    if duration_type is not None:
-        if duration_type == 'whole':
-            jianpu_note += ' - - -'
-        elif duration_type == 'half':
-            jianpu_note += ' -'
-        elif duration_type == 'quarter':
-            jianpu_note += ''
-        elif duration_type == 'eighth':
-            jianpu_note += '_'
-        elif duration_type == "16th":
-            jianpu_note += "="
-        elif duration_type == "32nd":
-            jianpu_note += "/"
-        elif duration_type == "64th":
-            jianpu_note += "\\"
-    else: 
-        if duration == 8:
-            jianpu_note += ' - - -'
-        elif duration == 4:
-            jianpu_note += ' -'
-        elif duration == 2:
-            jianpu_note += ''
-        elif duration == 1:
-            jianpu_note += '_'
-        elif duration == 0.5:
-            jianpu_note += "="
-        elif duration == 0.25:
-            jianpu_note += "/"
-        elif duration == 0.125:
-            jianpu_note += "\\" 
+    if octave >= 4:
+        # 处理高音点
+        if octave == 5:
+            jianpu_note += "'"
+        elif octave == 6:
+            jianpu_note += "\""
+        elif octave == 7:
+            jianpu_note += "`"
         
+        # 加入时值标识
+        if note_type is not None:
+            if note_type == 'whole':
+                jianpu_note += ' - - -'
+            elif note_type == 'half':
+                jianpu_note += ' -'
+            elif note_type == 'quarter':
+                jianpu_note += ''
+            elif note_type == 'eighth':
+                jianpu_note += '_'
+            elif note_type == "16th":
+                jianpu_note += "="
+            elif note_type == "32nd":
+                jianpu_note += "/"
+            elif note_type == "64th":
+                jianpu_note += "\\"
+        else: 
+            if duration == 8:
+                jianpu_note += ' - - -'
+            elif duration == 4:
+                jianpu_note += ' -'
+            elif duration == 2:
+                jianpu_note += ''
+            elif duration == 1:
+                jianpu_note += '_'
+            elif duration == 0.5:
+                jianpu_note += "="
+            elif duration == 0.25:
+                jianpu_note += "/"
+            elif duration == 0.125:
+                jianpu_note += "\\" 
+    elif octave < 4:
+        # TODO: 低音音符处理
+        # 下面 copy 了 octave > 4 的处理逻辑，写的时候删去就好。
+        
+        # 加入时值标识
+        if note_type is not None:
+            if note_type == 'whole':
+                jianpu_note += ' - - -'
+            elif note_type == 'half':
+                jianpu_note += ' -'
+            elif note_type == 'quarter':
+                jianpu_note += ''
+            elif note_type == 'eighth':
+                jianpu_note += '_'
+            elif note_type == "16th":
+                jianpu_note += "="
+            elif note_type == "32nd":
+                jianpu_note += "/"
+            elif note_type == "64th":
+                jianpu_note += "\\"
+        else: 
+            if duration == 8:
+                jianpu_note += ' - - -'
+            elif duration == 4:
+                jianpu_note += ' -'
+            elif duration == 2:
+                jianpu_note += ''
+            elif duration == 1:
+                jianpu_note += '_'
+            elif duration == 0.5:
+                jianpu_note += "="
+            elif duration == 0.25:
+                jianpu_note += "/"
+            elif duration == 0.125:
+                jianpu_note += "\\"  
+    
+    # 加入附点   
     if dot_count == 1:
         jianpu_note += '.'
     elif dot_count == 2:
@@ -88,7 +144,8 @@ def convert_to_jianpu(note, fifths):
     return jianpu_note
 
 
-def parse(file_path):
+def parse(file_path) -> str:
+    '''返回简谱排版所需要输入的字符串'''
     tree = ET.parse(file_path)
     root = tree.getroot()
 
@@ -98,15 +155,19 @@ def parse(file_path):
     fifths = 0
     beam = False
 
+    # 遍历小节(measure)
     for measure in root.findall('.//measure'):
         attributes = measure.find('attributes')
         notes = measure.findall('note') 
         if attributes is not None:
+            # 获得乐谱属性
             div = attributes.find('divisions')
             if attributes.find('key/fifths') is not None:
                 fifths = (attributes.find('key/fifths').text)
             if div is not None:
                 divisions = int(div.text)
+        
+        # 遍历小节中的音符
         for note in notes:
             rest = note.find('rest')
             pitch = note.find('pitch')
@@ -125,7 +186,10 @@ def parse(file_path):
                                 'type': note_type,
                                 'dot_count': dot_count
                             }, 
-                            fifths
+                            {
+                                'fifths': fifths,
+                                'divisions': divisions,
+                            }
                         ) + ' '
 
             if pitch is not None:
@@ -152,8 +216,13 @@ def parse(file_path):
                                 'type': note_type,
                                 'dot_count': dot_count
                             },
-                            fifths
+                            {
+                                'fifths': fifths,
+                                'divisions': divisions,
+                            }
                         ) + spacing
+        
+        # 处理特殊小节线
         barline = measure.find('barline')
         if  barline is not None:
             if barline.find('bar-style').text == "light-light":
@@ -165,25 +234,20 @@ def parse(file_path):
     return score
     
 
-
-def create_word_with_notes(notes, output_doc):
+def create_doc(notes, output_doc):
     doc = Document()
     p = doc.add_paragraph()
-    
     run = p.add_run(notes)
-
     run.font.name = 'jpfont-nds'
-
     r = run._element
     rFonts = r.find(qn('w:rPr')).find(qn('w:rFonts'))
     if rFonts is None:
         rFonts = OxmlElement('w:rFonts')
         r.get_or_add('w:rPr').append(rFonts)
     rFonts.set(qn('w:eastAsia'), 'jpfont-nds')
-
     run.font.size = Pt(12)
-
     doc.save(output_doc)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -194,7 +258,6 @@ if __name__ == "__main__":
     output_doc = 'outputs/' + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + '.docx'
 
     notes = parse(musicxml_file)
-
-    create_word_with_notes(notes, output_doc)
+    create_doc(notes, output_doc)
 
     print("Score saved to " + output_doc)
