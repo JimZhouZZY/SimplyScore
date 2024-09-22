@@ -12,7 +12,7 @@ correction = {
     "-6": -4,
     "-5": -1,
     "-4":  -5,
-    "-3": -3,
+    "-3": -2,
     "-2": -6,
     "-1": -3,
     "0": 0,
@@ -96,6 +96,7 @@ def parse(file_path):
     divisions = 1
 
     fifths = 0
+    beam = False
 
     for measure in root.findall('.//measure'):
         attributes = measure.find('attributes')
@@ -133,6 +134,15 @@ def parse(file_path):
                 duration = int(note.find('duration').text)
                 note_type = note.find('type').text
                 dot_count = len(note.findall('dot'))
+                beam_be = note.find('beam')
+                
+                if beam_be is not None:
+                    beam = True if beam_be.text == 'begin' else False
+                
+                spacing = ' '
+                if beam:
+                    spacing = '' 
+
 
                 score += convert_to_jianpu(
                             {
@@ -143,8 +153,15 @@ def parse(file_path):
                                 'dot_count': dot_count
                             },
                             fifths
-                        ) + ' '
-        score += "| " 
+                        ) + spacing
+        barline = measure.find('barline')
+        if  barline is not None:
+            if barline.find('bar-style').text == "light-light":
+                score += "| | "
+            elif barline.find('bar-style').text == "light-heavy":
+                score += "+"
+        else:
+            score += "| " 
     return score
     
 
