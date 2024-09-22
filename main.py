@@ -1,3 +1,4 @@
+import argparse
 import xml.etree.ElementTree as ET
 from docx import Document
 from docx.shared import Pt
@@ -167,8 +168,12 @@ def create_word_with_notes(notes, output_doc):
     doc.save(output_doc)
 
 if __name__ == "__main__":
-    musicxml_file = 'music.xml'
-    output_doc = 'output.docx'
+    parser = argparse.ArgumentParser()
+    arser.add_argument('filename', type=str)
+    args = parser.parse_args()
+
+    musicxml_file = args.filename
+    output_doc = 'outputs/' + current_time.strftime("%Y_%m_%d_%H_%M_%S") + '.docx'
 
     notes = parse(musicxml_file)
 
