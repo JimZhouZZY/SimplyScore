@@ -1,11 +1,9 @@
 # MusicXML and outputs
-*.xml
-music.xml
-*.MusicXML
 *.docx
 
 # Trash
 .trash/
+.DS_Store/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
