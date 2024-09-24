@@ -48,19 +48,26 @@ def convert_to_jianpu(note, attributes):
     fifths = attributes['fifths']
     divisions = attributes['divisions']
 
+    jianpu_note = ""
+    note_step_cor = 0
+
     if note_step in MAP_NOTE:
         if note_step == 'R':
+            note_step_cor = 0
             jianpu_note = '0' 
         else:
-            note_step_cor = (int(MAP_NOTE[note_step]) + MAP_CORRECTION[str(fifths)])%7
-            jianpu_note = str(note_step_cor) if note_step_cor != 0 else '7'
-            if (int(MAP_NOTE[note_step]) + MAP_CORRECTION[str(fifths)]) <= 0:
+            temp_step_cor = int(MAP_NOTE[note_step]) + MAP_CORRECTION[str(fifths)]
+            note_step_cor = temp_step_cor%7
+            
+            note_step_cor = note_step_cor if note_step_cor != 0 else 7
+            jianpu_note = str(note_step_cor)
+            if temp_step_cor <= 0:
                 octave -= 1 
     else:
         return ""
 
     if octave >= 4:
-        # 处理高音点
+        # 处理高音音符(包括中音音符)
         if octave == 5:
             jianpu_note += "'"
         elif octave == 6:
@@ -69,71 +76,70 @@ def convert_to_jianpu(note, attributes):
             jianpu_note += "`"
         
         # 加入时值标识
-        if note_type is not None:
-            if note_type == 'whole':
-                jianpu_note += ' - - -'
-            elif note_type == 'half':
-                jianpu_note += ' -'
-            elif note_type == 'quarter':
-                jianpu_note += ''
-            elif note_type == 'eighth':
-                jianpu_note += '_'
-            elif note_type == "16th":
-                jianpu_note += "="
-            elif note_type == "32nd":
-                jianpu_note += "/"
-            elif note_type == "64th":
-                jianpu_note += "\\"
-        else: 
-            if duration == 8:
-                jianpu_note += ' - - -'
-            elif duration == 4:
-                jianpu_note += ' -'
-            elif duration == 2:
-                jianpu_note += ''
-            elif duration == 1:
-                jianpu_note += '_'
-            elif duration == 0.5:
-                jianpu_note += "="
-            elif duration == 0.25:
-                jianpu_note += "/"
-            elif duration == 0.125:
-                jianpu_note += "\\" 
+        if note_type == 'whole' or duration / divisions == 4:
+            jianpu_note += ' - - -'
+        elif note_type == 'half' or duration / divisions == 2:
+            jianpu_note += ' -'
+        elif note_type == 'quarter' or duration / divisions == 1:
+            jianpu_note += ''
+        elif note_type == 'eighth' or duration / divisions == 0.5:
+            jianpu_note += '_'
+        elif note_type == "16th" or duration / divisions == 0.25:
+            jianpu_note += "="
+        elif note_type == "32nd" or duration / divisions == 0.125:
+            jianpu_note += "/"
+        elif note_type == "64th" or duration / divisions == 1/16:
+            jianpu_note += "\\"
+
     elif octave < 4:
         # TODO: 低音音符处理
         # 下面 copy 了 octave > 4 的处理逻辑，写的时候删去就好。
-        
-        # 加入时值标识
-        if note_type is not None:
-            if note_type == 'whole':
-                jianpu_note += ' - - -'
-            elif note_type == 'half':
-                jianpu_note += ' -'
-            elif note_type == 'quarter':
-                jianpu_note += ''
-            elif note_type == 'eighth':
-                jianpu_note += '_'
-            elif note_type == "16th":
-                jianpu_note += "="
-            elif note_type == "32nd":
-                jianpu_note += "/"
-            elif note_type == "64th":
-                jianpu_note += "\\"
-        else: 
-            if duration == 8:
-                jianpu_note += ' - - -'
-            elif duration == 4:
-                jianpu_note += ' -'
-            elif duration == 2:
-                jianpu_note += ''
-            elif duration == 1:
-                jianpu_note += '_'
-            elif duration == 0.5:
-                jianpu_note += "="
-            elif duration == 0.25:
-                jianpu_note += "/"
-            elif duration == 0.125:
-                jianpu_note += "\\"  
+
+        if octave == 3:
+            if note_type == 'whole' or duration / divisions == 4:
+                jianpu_note += 'q - - -'
+            elif note_type == 'half' or duration / divisions == 2:
+                jianpu_note += 'q -'
+            elif note_type == 'quarter' or duration / divisions == 1:
+                jianpu_note += 'q' 
+            elif note_type == 'eighth' or duration / divisions == 0.5:
+                jianpu_note += 'w'
+            elif note_type == "16th" or duration / divisions == 0.25:
+                jianpu_note += "e"
+            elif note_type == "32nd" or duration / divisions == 0.125:
+                jianpu_note += "r"
+            elif note_type == "64th" or duration / divisions == 1/16:
+                jianpu_note += "t"
+        elif octave == 2:
+            if note_type == 'whole' or duration / divisions == 4:
+                jianpu_note += 'a - - -'
+            elif note_type == 'half' or duration / divisions == 2:
+                jianpu_note += 'a -'
+            elif note_type == 'quarter' or duration / divisions == 1:
+                jianpu_note += 'a' 
+            elif note_type == 'eighth' or duration / divisions == 0.5:
+                jianpu_note += 's'
+            elif note_type == "16th" or duration / divisions == 0.25:
+                jianpu_note += "d"
+            elif note_type == "32nd" or duration / divisions == 0.125:
+                jianpu_note += "f"
+            elif note_type == "64th" or duration / divisions == 1/16:
+                jianpu_note += "g"
+        elif octave == 1:
+            if note_type == 'whole' or duration / divisions == 4:
+                jianpu_note += 'z - - -'
+            elif note_type == 'half' or duration / divisions == 2:
+                jianpu_note += 'z -'
+            elif note_type == 'quarter' or duration / divisions == 1:
+                jianpu_note += 'z' 
+            elif note_type == 'eighth' or duration / divisions == 0.5:
+                jianpu_note += 'x'
+            elif note_type == "16th" or duration / divisions == 0.25:
+                jianpu_note += "c"
+            elif note_type == "32nd" or duration / divisions == 0.125:
+                jianpu_note += "v"
+            elif note_type == "64th" or duration / divisions == 1/16:
+                jianpu_note += "g"
     
     # 加入附点   
     if dot_count == 1:
@@ -206,7 +212,6 @@ def parse(file_path) -> str:
                 spacing = ' '
                 if beam:
                     spacing = '' 
-
 
                 score += convert_to_jianpu(
                             {
