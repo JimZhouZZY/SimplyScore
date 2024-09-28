@@ -3,7 +3,8 @@
 
 # Trash
 .trash/
-.DS_Store/
+.DS_Store
+.trash
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
