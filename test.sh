@@ -1,1 +1,4 @@
-sh tests/testrun/testrun.sh
+rm -rf outputs
+mkdir outputs
+pytest
+

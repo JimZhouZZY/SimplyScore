@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import xml.etree.ElementTree as ET
+import os
 
 from docx import Document
 from docx.shared import Pt
@@ -260,7 +261,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     musicxml_file = args.filename
-    output_doc = 'outputs/' + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + '.docx'
+    output_filename = os.path.splitext(os.path.basename(musicxml_file))[0]
+    output_doc = 'outputs/' + output_filename + "_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + '.docx'
 
     notes = parse(musicxml_file)
     create_doc(notes, output_doc)
