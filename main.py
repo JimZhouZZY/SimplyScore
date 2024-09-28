@@ -45,6 +45,7 @@ def convert_to_jianpu(note, attributes):
     note_type = note['type']
     duration = note['duration']
     dot_count = note['dot_count']
+    accidental = note['accidental']
 
     fifths = attributes['fifths']
     divisions = attributes['divisions']
@@ -148,6 +149,19 @@ def convert_to_jianpu(note, attributes):
     elif dot_count == 2:
         jianpu_note += '.,'
 
+    # 加入升降号
+    # TODO: 参考 MusicXML 文档进行更多实现
+    # https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/accidental-value/
+    if accidental is not None:
+        print(accidental)
+        if accidental == 'sharp':
+            jianpu_note = 'i' + jianpu_note
+        elif accidental == 'natural':
+            jianpu_note = 'o' + jianpu_note
+        elif accidental == 'flat':
+            jianpu_note = 'p' + jianpu_note
+        
+
     return jianpu_note
 
 
@@ -179,6 +193,7 @@ def parse(file_path) -> str:
             rest = note.find('rest')
             pitch = note.find('pitch')
             if rest is not None:
+                # 特殊处理空拍
                 duration = int(note.find('duration').text)
                 note_type = None
                 if note.find('type') is not None:
@@ -191,28 +206,34 @@ def parse(file_path) -> str:
                                 'octave': 4,
                                 'duration': duration,
                                 'type': note_type,
-                                'dot_count': dot_count
+                                'dot_count': dot_count,
+                                'accidental': None,
                             }, 
                             {
                                 'fifths': fifths,
                                 'divisions': divisions,
                             }
                         ) + ' '
-
-            if pitch is not None:
+            elif pitch is not None:
                 step = pitch.find('step').text
                 octave = int(pitch.find('octave').text)
                 duration = int(note.find('duration').text)
                 note_type = note.find('type').text
                 dot_count = len(note.findall('dot'))
-                beam_be = note.find('beam')
-                
-                if beam_be is not None:
-                    beam = True if beam_be.text == 'begin' else False
-                
+                accidental = note.find('accidental')
+                beam = note.find('beam')
+
+                # 处理符杠
                 spacing = ' '
-                if beam:
+                
+                if beam is not None:
+                    beam = beam.text
+                if beam == "begin" or beam == "continue":
                     spacing = '' 
+                
+                # 升降号
+                if accidental is not None:
+                    accidental = accidental.text
 
                 score += convert_to_jianpu(
                             {
@@ -220,7 +241,8 @@ def parse(file_path) -> str:
                                 'octave': octave,
                                 'duration': duration,
                                 'type': note_type,
-                                'dot_count': dot_count
+                                'dot_count': dot_count,
+                                'accidental': accidental,
                             },
                             {
                                 'fifths': fifths,
@@ -262,7 +284,7 @@ if __name__ == "__main__":
 
     musicxml_file = args.filename
     output_filename = os.path.splitext(os.path.basename(musicxml_file))[0]
-    output_doc = 'outputs\\' + output_filename + "_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + '.docx'
+    output_doc = 'outputs/' + output_filename + "_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + '.docx'
 
     notes = parse(musicxml_file)
     create_doc(notes, output_doc)
