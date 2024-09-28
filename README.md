@@ -6,7 +6,7 @@ Firstly, install the required font for simplified music score in `fonts/`.
 
 Secondly, install the required libs:`pip3 install python-docx`.
 
-Lastly, run `python3 main.py tests/musicxml/music.xml` and check the `outputs` folder for the compiled score.
+Lastly, run `python3 main.py tests/musicxml/test_run.xml` and check the `outputs` folder for the compiled score.
 
 ## Acknowledgment
 
