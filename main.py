@@ -153,7 +153,6 @@ def convert_to_jianpu(note, attributes):
     # TODO: 参考 MusicXML 文档进行更多实现
     # https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/accidental-value/
     if accidental is not None:
-        print(accidental)
         if accidental == 'sharp':
             jianpu_note = 'i' + jianpu_note
         elif accidental == 'natural':
@@ -285,6 +284,8 @@ if __name__ == "__main__":
     musicxml_file = args.filename
     output_filename = os.path.splitext(os.path.basename(musicxml_file))[0]
     output_doc = 'outputs/' + output_filename + "_"+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + '.docx'
+    with open(output_doc, 'w') as file:
+        pass
 
     notes = parse(musicxml_file)
     create_doc(notes, output_doc)
