@@ -8,27 +8,15 @@ from docx.shared import Pt
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
-# Mapping note names and notes. 
-MAP_NOTE = {
-    'R': '0', 
-    'C': '1', 
-    'D': '2', 
-    'E': '3', 
-    'F': '4', 
-    'G': '5', 
-    'A': '6', 
-    'B': '7'
-}
-
 # Mapping fifths value and pitch correction
 MAP_CORRECTION = {
     "-7": 0,
-    "-6": -4,
-    "-5": -1,
-    "-4":  -5,
-    "-3": -2,
-    "-2": -6,
-    "-1": -3,
+    "-6": 4,
+    "-5": 1,
+    "-4": 5,
+    "-3": 2,
+    "-2": 6,
+    "-1": 3,
     "0": 0,
     "1": -4,
     "2": -1,
@@ -39,129 +27,159 @@ MAP_CORRECTION = {
     "7": 0,
 }
 
-def convert_to_jianpu(note, attributes):
-    note_step = note["step"]
-    octave = note['octave']
-    note_type = note['type']
-    duration = note['duration']
-    dot_count = note['dot_count']
-    accidental = note['accidental']
+def v1(v2, v3):
+    v4 = v2["step"]
+    v5 = v2['octave']
+    v6 = v2['type']
+    v7 = v2['duration']
+    v8 = v2['dot_count']
+    v9 = v2['accidental']
 
-    fifths = attributes['fifths']
-    divisions = attributes['divisions']
+    v10 = v3['fifths']
+    v11 = v3['divisions']
 
-    jianpu_note = ""
-    note_step_cor = 0
+    v12 = ""
+    v13 = 0
 
-    if note_step in MAP_NOTE:
-        if note_step == 'R':
-            note_step_cor = 0
-            jianpu_note = '0' 
-        else:
-            temp_step_cor = int(MAP_NOTE[note_step]) + MAP_CORRECTION[str(fifths)]
-            note_step_cor = temp_step_cor%7
-            
-            note_step_cor = note_step_cor if note_step_cor != 0 else 7
-            jianpu_note = str(note_step_cor)
-            if temp_step_cor <= 0:
-                octave -= 1 
+    if v4 == 'R':
+        v13 = 0
+        v12 = chr(48)
+    elif v4 == 'C':
+        v14 = 1 + int(MAP_CORRECTION[str(v10)])
+        v13 = v14 % 7
+        v13 = v13 if v13 != 0 else 7
+        v12 = chr(48 + v13)
+        if v14 <= 0:
+            v5 -= 1
+    elif v4 == 'D':
+        v14 = 2 + int(MAP_CORRECTION[str(v10)])
+        v13 = v14 % 7
+        v13 = v13 if v13 != 0 else 7
+        v12 = chr(48 + v13)
+        if v14 <= 0:
+            v5 -= 1
+    elif v4 == 'E':
+        v14 = 3 + int(MAP_CORRECTION[str(v10)])
+        v13 = v14 % 7
+        v13 = v13 if v13 != 0 else 7
+        v12 = chr(48 + v13)
+        if v14 <= 0:
+            v5 -= 1
+    elif v4 == 'F':
+        v14 = 4 + int(MAP_CORRECTION[str(v10)])
+        v13 = v14 % 7
+        v13 = v13 if v13 != 0 else 7
+        v12 = chr(48 + v13)
+        if v14 <= 0:
+            v5 -= 1
+    elif v4 == 'G':
+        v14 = 5 + int(MAP_CORRECTION[str(v10)])
+        v13 = v14 % 7
+        v13 = v13 if v13 != 0 else 7
+        v12 = chr(48 + v13)
+        if v14 <= 0:
+            v5 -= 1
+    elif v4 == 'A':
+        v14 = 6 + int(MAP_CORRECTION[str(v10)])
+        v13 = v14 % 7
+        v13 = v13 if v13 != 0 else 7
+        v12 = chr(48 + v13)
+        if v14 <= 0:
+            v5 -= 1
+    elif v4 == 'B':
+        v14 = 7 + int(MAP_CORRECTION[str(v10)])
+        v13 = v14 % 7
+        v13 = v13 if v13 != 0 else 7
+        v12 = chr(48 + v13)
+        if v14 <= 0:
+            v5 -= 1
     else:
         return ""
 
-    if octave >= 4:
-        # 处理高音音符(包括中音音符)
-        if octave == 5:
-            jianpu_note += "'"
-        elif octave == 6:
-            jianpu_note += "\""
-        elif octave == 7:
-            jianpu_note += "`"
-        
-        # 加入时值标识
-        if note_type == 'whole' or duration / divisions == 4:
-            jianpu_note += ' - - -'
-        elif note_type == 'half' or duration / divisions == 2:
-            jianpu_note += ' -'
-        elif note_type == 'quarter' or duration / divisions == 1:
-            jianpu_note += ''
-        elif note_type == 'eighth' or duration / divisions == 0.5:
-            jianpu_note += '_'
-        elif note_type == "16th" or duration / divisions == 0.25:
-            jianpu_note += "="
-        elif note_type == "32nd" or duration / divisions == 0.125:
-            jianpu_note += "/"
-        elif note_type == "64th" or duration / divisions == 1/16:
-            jianpu_note += "\\"
+    if v5 >= 4:
+        if v5 == 5:
+            v12 += chr(39)
+        elif v5 == 6:
+            v12 += chr(34)
+        elif v5 == 7:
+            v12 += chr(96)
 
-    elif octave < 4:
-        # TODO: 低音音符处理
-        # 下面 copy 了 octave > 4 的处理逻辑，写的时候删去就好。
+        if v6 == 'whole' or v7 / v11 == 4:
+            v12 += ' - - -'
+        elif v6 == 'half' or v7 / v11 == 2:
+            v12 += ' -'
+        elif v6 == 'quarter' or v7 / v11 == 1:
+            v12 += ''
+        elif v6 == 'eighth' or v7 / v11 == 0.5:
+            v12 += '_'
+        elif v6 == "16th" or v7 / v11 == 0.25:
+            v12 += "="
+        elif v6 == "32nd" or v7 / v11 == 0.125:
+            v12 += "/"
+        elif v6 == "64th" or v7 / v11 == 1/16:
+            v12 += "\\"
 
-        if octave == 3:
-            if note_type == 'whole' or duration / divisions == 4:
-                jianpu_note += 'q - - -'
-            elif note_type == 'half' or duration / divisions == 2:
-                jianpu_note += 'q -'
-            elif note_type == 'quarter' or duration / divisions == 1:
-                jianpu_note += 'q' 
-            elif note_type == 'eighth' or duration / divisions == 0.5:
-                jianpu_note += 'w'
-            elif note_type == "16th" or duration / divisions == 0.25:
-                jianpu_note += "e"
-            elif note_type == "32nd" or duration / divisions == 0.125:
-                jianpu_note += "r"
-            elif note_type == "64th" or duration / divisions == 1/16:
-                jianpu_note += "t"
-        elif octave == 2:
-            if note_type == 'whole' or duration / divisions == 4:
-                jianpu_note += 'a - - -'
-            elif note_type == 'half' or duration / divisions == 2:
-                jianpu_note += 'a -'
-            elif note_type == 'quarter' or duration / divisions == 1:
-                jianpu_note += 'a' 
-            elif note_type == 'eighth' or duration / divisions == 0.5:
-                jianpu_note += 's'
-            elif note_type == "16th" or duration / divisions == 0.25:
-                jianpu_note += "d"
-            elif note_type == "32nd" or duration / divisions == 0.125:
-                jianpu_note += "f"
-            elif note_type == "64th" or duration / divisions == 1/16:
-                jianpu_note += "g"
-        elif octave == 1:
-            if note_type == 'whole' or duration / divisions == 4:
-                jianpu_note += 'z - - -'
-            elif note_type == 'half' or duration / divisions == 2:
-                jianpu_note += 'z -'
-            elif note_type == 'quarter' or duration / divisions == 1:
-                jianpu_note += 'z' 
-            elif note_type == 'eighth' or duration / divisions == 0.5:
-                jianpu_note += 'x'
-            elif note_type == "16th" or duration / divisions == 0.25:
-                jianpu_note += "c"
-            elif note_type == "32nd" or duration / divisions == 0.125:
-                jianpu_note += "v"
-            elif note_type == "64th" or duration / divisions == 1/16:
-                jianpu_note += "g"
-    
-    # 加入附点   
-    if dot_count == 1:
-        jianpu_note += '.'
-    elif dot_count == 2:
-        jianpu_note += '.,'
+    elif v5 < 4:
+        if v5 == 3:
+            if v6 == 'whole' or v7 / v11 == 4:
+                v12 += chr(113) + ' - - -'
+            elif v6 == 'half' or v7 / v11 == 2:
+                v12 += chr(113) + ' -'
+            elif v6 == 'quarter' or v7 / v11 == 1:
+                v12 += chr(113)
+            elif v6 == 'eighth' or v7 / v11 == 0.5:
+                v12 += chr(119)
+            elif v6 == "16th" or v7 / v11 == 0.25:
+                v12 += chr(101)
+            elif v6 == "32nd" or v7 / v11 == 0.125:
+                v12 += chr(114)
+            elif v6 == "64th" or v7 / v11 == 1/16:
+                v12 += chr(116)
+        elif v5 == 2:
+            if v6 == 'whole' or v7 / v11 == 4:
+                v12 += chr(97) + ' - - -'
+            elif v6 == 'half' or v7 / v11 == 2:
+                v12 += chr(97) + ' -'
+            elif v6 == 'quarter' or v7 / v11 == 1:
+                v12 += chr(97)
+            elif v6 == 'eighth' or v7 / v11 == 0.5:
+                v12 += chr(115)
+            elif v6 == "16th" or v7 / v11 == 0.25:
+                v12 += chr(100)
+            elif v6 == "32nd" or v7 / v11 == 0.125:
+                v12 += chr(102)
+            elif v6 == "64th" or v7 / v11 == 1/16:
+                v12 += chr(103)
+        elif v5 == 1:
+            if v6 == 'whole' or v7 / v11 == 4:
+                v12 += chr(122) + ' - - -'
+            elif v6 == 'half' or v7 / v11 == 2:
+                v12 += chr(122) + ' -'
+            elif v6 == 'quarter' or v7 / v11 == 1:
+                v12 += chr(122)
+            elif v6 == 'eighth' or v7 / v11 == 0.5:
+                v12 += chr(120)
+            elif v6 == "16th" or v7 / v11 == 0.25:
+                v12 += chr(99)
+            elif v6 == "32nd" or v7 / v11 == 0.125:
+                v12 += chr(118)
+            elif v6 == "64th" or v7 / v11 == 1/16:
+                v12 += chr(103)
 
-    # 加入升降号
-    # TODO: 参考 MusicXML 文档进行更多实现
-    # https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/accidental-value/
-    if accidental is not None:
-        if accidental == 'sharp':
-            jianpu_note = 'i' + jianpu_note
-        elif accidental == 'natural':
-            jianpu_note = 'o' + jianpu_note
-        elif accidental == 'flat':
-            jianpu_note = 'p' + jianpu_note
-        
+    if v8 == 1:
+        v12 += chr(46)
+    elif v8 == 2:
+        v12 += chr(46) + chr(44)
 
-    return jianpu_note
+    if v9 is not None:
+        if v9 == 'sharp':
+            v12 = chr(105) + v12
+        elif v9 == 'natural':
+            v12 = chr(111) + v12
+        elif v9 == 'flat':
+            v12 = chr(112) + v12
+
+    return v12
 
 
 def parse(file_path) -> str:
@@ -199,7 +217,7 @@ def parse(file_path) -> str:
                     note_type = note.find('type').text
                 dot_count = len(note.findall('dot'))
 
-                score += convert_to_jianpu(
+                score += v1(
                             {
                                 'step': 'R',
                                 'octave': 4,
@@ -234,7 +252,7 @@ def parse(file_path) -> str:
                 if accidental is not None:
                     accidental = accidental.text
 
-                score += convert_to_jianpu(
+                score += v1(
                             {
                                 'step': step,
                                 'octave': octave,
