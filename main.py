@@ -171,7 +171,7 @@ def convert_to_jianpu(note, attributes):
     # 处理连音线
     jianpu_note_splitted = jianpu_note.split(' ')
     if not (tie_start or tie_stop) and tie_started:
-        jianpu_note_splitted[0] += 'I'
+        jianpu_note_splitted[0] += 'IO'
         for i in range(1, len(jianpu_note_splitted)):
             jianpu_note_splitted[i] += 'IO'
     if tie_stop:
@@ -299,7 +299,7 @@ def parse(file_path) -> str:
                 score += "| "
 
     # 去除多余的连音横线
-    score = re.sub(r'UO([1-7])P', r'U\1P', score)
+    score = re.sub(r'\bUO([1-7])P\b', r'U\1P', score)
     return score
 
 
