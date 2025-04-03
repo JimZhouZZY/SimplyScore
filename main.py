@@ -189,8 +189,6 @@ def convert_to_jianpu(note, attributes):
 
 def parse(file_path) -> str:
     '''返回简谱排版所需要输入的字符串'''
-    global tie_started
-
     tree = ET.parse(file_path)
     root = tree.getroot()
 
